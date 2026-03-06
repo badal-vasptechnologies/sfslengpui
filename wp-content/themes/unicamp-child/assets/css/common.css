@@ -47,3 +47,7 @@ Tags: editor-style, featured-images, microformats, post-formats, rtl-language-su
 .page-id-5400 .unicamp-student-story-list .post-item {
   /*border-bottom: 1px solid #0a2aa8 !important;*/
 }
+
+.page-navigation .children > li > a {
+  color: #000 !important;
+}
