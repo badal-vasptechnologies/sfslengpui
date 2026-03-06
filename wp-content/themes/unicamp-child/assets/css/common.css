@@ -51,3 +51,7 @@ Tags: editor-style, featured-images, microformats, post-formats, rtl-language-su
 .page-navigation .children > li > a {
   color: #000 !important;
 }
+
+#page-open-components {
+  display: none !important;
+}
