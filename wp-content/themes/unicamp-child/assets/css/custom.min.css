@@ -1,0 +1,8 @@
+
+/*# sourceMappingURL=custom.min.css.map */
+
+@media only screen and (max-width: 600px) {
+  body .page-top-bar {
+    /*display: none !important;*/
+  }
+}

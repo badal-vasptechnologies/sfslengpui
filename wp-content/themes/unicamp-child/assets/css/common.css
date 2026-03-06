@@ -1,0 +1,49 @@
+/*
+Theme Name: Unicamp Child
+Theme URI: https://unicamp.thememove.com/
+Author: ThemeMove
+Author URI: https://thememove.com/
+Version: 1.0.0
+Template: unicamp
+Text Domain: unicamp-child
+Tags: editor-style, featured-images, microformats, post-formats, rtl-language-support, sticky-post, threaded-comments, translation-ready
+*/
+
+@media (min-width: 1200px) {
+  .page-top-bar .menu--secondary > ul > li > a {
+    padding: 0 10px !important;
+  }
+}
+
+.page-top-bar .menu--secondary > ul > li > a {
+  text-transform: capitalize !important;
+  padding: 0 10px !important;
+}
+
+.desktop-menu .sm-simple li > a {
+  padding: 10px 10px 10px 10px !important;
+  font-weight: bold;
+}
+
+.page-top-bar .menu .sub-menu a {
+  padding: 20px !important;
+  color: black !important;
+}
+.insight_core_breadcrumb {
+  color: white !important;
+}
+.insight_core_breadcrumb li a {
+  color: white !important;
+}
+
+.blog .page-title-bar-bg {
+	background-image: url(/wp-content/uploads/2026/02/common.webp) !important;
+}
+
+.single-post .page-title-bar-bg {
+	background-image: url(/wp-content/uploads/2026/02/common.webp) !important;
+}
+
+.page-id-5400 .unicamp-student-story-list .post-item {
+  /*border-bottom: 1px solid #0a2aa8 !important;*/
+}
