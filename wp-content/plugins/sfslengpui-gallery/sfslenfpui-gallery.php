@@ -3,7 +3,7 @@
 Plugin Name: SFS Lengpui Gallery
 Description: Custom album-style photo gallery plugin for SFS Lengpui website
 Version: 1.0
-Author: IT Geek
+Author: rex
 */
 
 if (!defined('ABSPATH')) {
