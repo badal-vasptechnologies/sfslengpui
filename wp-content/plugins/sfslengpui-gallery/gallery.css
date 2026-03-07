@@ -1,0 +1,483 @@
+/* =========================================
+   SFS Lengpui Gallery — Premium Album Style
+   ========================================= */
+
+/* Hide Unicamp theme's page title bar background on gallery page */
+.page-title-bar-inner {
+  display: none !important;
+}
+
+/* ---------- Hero Banner ---------- */
+.photo-gallery-hero {
+  background: linear-gradient(135deg, #2a4880 0%, #1f3561 100%);
+  padding: 60px 0;
+  text-align: center;
+  color: #fff;
+}
+
+.photo-gallery-hero h1 {
+  font-size: 2.5rem;
+  line-height: 1.2;
+  font-weight: 700;
+  margin: 0;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  animation: fadeInDown 1s ease-out;
+}
+
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ---------- Gallery Container ---------- */
+.sfs-gallery-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 10px 20px;
+}
+
+.sfs-gallery-container .sfs-gallery-title {
+  text-align: center;
+  color: #111;
+  margin-bottom: 30px;
+  font-size: clamp(1.8rem, 5vw, 2.5rem);
+  font-weight: bold;
+}
+
+/* ---------- Album / Folder Grid ---------- */
+.sfs-folder-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 20px;
+  padding: 10px;
+}
+
+.sfs-folder-item {
+  position: relative;
+  overflow: hidden;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  transition:
+    transform 0.3s ease,
+    box-shadow 0.3s ease;
+  cursor: pointer;
+  background: #fff;
+}
+
+.sfs-folder-item:hover {
+  transform: scale(1.05);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.18);
+}
+
+/* Gradient overlay on hover */
+.sfs-folder-item::before {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.4), transparent);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  z-index: 1;
+}
+
+.sfs-folder-item:hover::before {
+  opacity: 1;
+}
+
+.sfs-folder-item img {
+  width: 100%;
+  height: 276px !important;
+  object-fit: cover;
+  display: block;
+}
+
+.sfs-folder-item .sfs-event-name {
+  padding: 10px;
+  text-align: center;
+  color: #333;
+  font-weight: bold;
+  background: rgba(255, 255, 255, 0.9);
+  font-size: 1rem !important;
+  position: relative;
+  z-index: 2;
+  border-top: 1px solid #ddd;
+  font-family: "Georgia", serif;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition:
+    color 0.3s ease,
+    background 0.3s ease;
+}
+
+.sfs-folder-item .sfs-event-name i {
+  font-size: 1rem;
+  color: #111;
+  transition:
+    transform 0.3s ease,
+    color 0.3s ease;
+}
+
+.sfs-folder-item:hover .sfs-event-name {
+  color: #fff;
+  background: #546381;
+}
+
+.sfs-folder-item:hover .sfs-event-name i {
+  transform: scale(1.2);
+  color: #fff;
+}
+
+/* ---------- Folder / Album Modal ---------- */
+.sfs-modal {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.95);
+  z-index: 99999;
+  overflow-y: auto;
+  padding: 20px;
+  backdrop-filter: blur(5px);
+}
+
+.sfs-modal-content {
+  max-width: 1200px;
+  width: 95%;
+  margin: 20px auto;
+  background: #fff;
+  border-radius: 8px;
+  padding: 20px;
+  position: relative;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+  animation: sfsModalFadeIn 0.3s ease;
+  pointer-events: all;
+}
+
+@keyframes sfsModalFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.sfs-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding-bottom: 15px;
+  border-bottom: 2px solid #eee;
+  position: sticky;
+  top: 0;
+  background: #fff;
+  z-index: 100000;
+}
+
+.sfs-modal-content h2 {
+  color: #333;
+  margin: 0;
+  font-size: clamp(1.2rem, 4vw, 1.8rem);
+  font-weight: 600;
+  padding-right: 20px;
+}
+
+.sfs-modal-images {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 20px;
+  max-height: calc(100vh - 200px);
+  overflow-y: auto;
+  padding: 10px;
+  padding-right: 15px;
+  will-change: scroll-position;
+}
+
+.sfs-modal-images img {
+  width: 100%;
+  height: 300px;
+  object-fit: cover;
+  border-radius: 8px;
+  cursor: pointer;
+  transition:
+    transform 0.3s ease,
+    box-shadow 0.3s ease;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.sfs-modal-images img:hover {
+  transform: scale(1.03);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+}
+
+/* Close button */
+.sfs-close {
+  color: #333;
+  font-size: 28px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  padding: 5px 15px;
+  border-radius: 5px;
+  background: #ffc107;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  line-height: 1;
+  position: relative;
+  z-index: 100001;
+  flex-shrink: 0;
+}
+
+.sfs-close:hover {
+  color: #fff;
+  background: #ff4444;
+}
+
+/* Custom Scrollbar */
+.sfs-modal-images::-webkit-scrollbar {
+  width: 10px;
+}
+
+.sfs-modal-images::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 5px;
+}
+
+.sfs-modal-images::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 5px;
+  border: 2px solid #f1f1f1;
+}
+
+.sfs-modal-images::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+/* ---------- Fullscreen Image Modal ---------- */
+.sfs-fullscreen-modal {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.95);
+  z-index: 100000;
+  justify-content: center;
+  align-items: center;
+}
+
+.sfs-fullscreen-content {
+  position: relative;
+  width: 90%;
+  height: 90vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.sfs-fullscreen-content img {
+  max-width: 100%;
+  max-height: 90vh;
+  object-fit: contain;
+  border-radius: 8px;
+  box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
+}
+
+.sfs-fullscreen-close {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  color: #fff;
+  font-size: 40px;
+  cursor: pointer;
+  z-index: 100001;
+  width: 50px;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.5);
+  border-radius: 50%;
+  border: none;
+  transition: all 0.3s ease;
+}
+
+.sfs-fullscreen-close:hover {
+  background: #ff4444;
+  transform: rotate(90deg);
+}
+
+/* Navigation buttons */
+.sfs-nav-button {
+  position: fixed;
+  top: 50%;
+  transform: translateY(-50%);
+  background: #ffc107;
+  border: none;
+  color: #fff;
+  font-size: 2rem;
+  padding: 3px 10px;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: all 0.3s ease;
+  z-index: 100001;
+}
+
+.sfs-nav-button:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.sfs-nav-prev {
+  left: 20px;
+}
+
+.sfs-nav-next {
+  right: 20px;
+}
+
+/* ---------- Body lock when modal open ---------- */
+body.sfs-modal-open {
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.sfs-modal.sfs-active {
+  pointer-events: all;
+}
+
+.sfs-fullscreen-modal.sfs-active {
+  pointer-events: all;
+}
+
+/* ---------- Responsive: XL screens ---------- */
+@media (min-width: 1200px) {
+  .sfs-folder-grid {
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 30px;
+  }
+
+  .sfs-folder-item img {
+    height: 220px !important;
+  }
+
+  .sfs-folder-item .sfs-event-name {
+    font-size: 1.2rem !important;
+  }
+
+  .sfs-modal-content {
+    max-width: 1400px;
+    padding: 30px;
+  }
+
+  .sfs-modal-images {
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+  }
+
+  .sfs-modal-images img {
+    height: 160px;
+  }
+
+  .sfs-modal-content h2 {
+    font-size: 2rem;
+  }
+}
+
+/* ---------- Responsive: Tablets ---------- */
+@media (max-width: 992px) {
+  .sfs-modal-images {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+  }
+
+  .sfs-modal-images img {
+    height: 250px;
+  }
+}
+
+@media (max-width: 768px) {
+  .sfs-folder-grid {
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  }
+
+  .sfs-folder-item img {
+    height: 160px !important;
+  }
+
+  .sfs-modal-images {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+  }
+
+  .sfs-modal-images img {
+    height: 200px;
+  }
+}
+
+/* ---------- Responsive: Small phones ---------- */
+@media (max-width: 576px) {
+  .sfs-modal-images {
+    grid-template-columns: 1fr;
+    gap: 15px;
+  }
+
+  .sfs-modal-images img {
+    height: 200px;
+  }
+
+  .sfs-modal-content {
+    padding: 15px;
+    margin: 10px;
+  }
+
+  .sfs-nav-button {
+    padding: 15px;
+    font-size: 1.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .sfs-folder-grid {
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  }
+
+  .sfs-folder-item img {
+    height: 140px !important;
+  }
+
+  .sfs-modal-images {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .sfs-modal-images img {
+    height: 180px;
+  }
+
+  .sfs-modal-content {
+    padding: 15px;
+    margin: 10px;
+  }
+}
