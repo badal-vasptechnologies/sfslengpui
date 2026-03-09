@@ -13,14 +13,10 @@ if (!defined('ABSPATH')) {
 define('SFSLENGPUI_GALLERY_VERSION', '2.3');
 define('SFSLENGPUI_GALLERY_ALBUM_TAXONOMY', 'sfs_gallery_album');
 
-// Enqueue frontend styles
 add_action('wp_enqueue_scripts', function () {
     wp_enqueue_style('sfslengpui-gallery-style', plugin_dir_url(__FILE__) . 'gallery.css', array(), SFSLENGPUI_GALLERY_VERSION);
 });
 
-/**
- * Register Taxonomy
- */
 add_action('init', function () {
     register_taxonomy(SFSLENGPUI_GALLERY_ALBUM_TAXONOMY, 'attachment', array(
         'labels' => array(
@@ -43,7 +39,6 @@ add_action('init', function () {
         'rewrite' => false,
     ));
 
-    // Register Video Post Type
     register_post_type('sfs_video', array(
         'labels' => array(
             'name' => 'Videos',
@@ -65,9 +60,6 @@ add_action('init', function () {
     ));
 });
 
-/**
- * Video URL Meta Box
- */
 add_action('add_meta_boxes_sfs_video', function () {
     add_meta_box('sfs_video_url_box', 'Video Details', function ($post) {
         $url = get_post_meta($post->ID, '_sfs_video_url', true);
@@ -84,9 +76,6 @@ add_action('save_post_sfs_video', function ($post_id) {
     }
 });
 
-/**
- * Admin UI: Add Columns & Buttons to Taxonomy List
- */
 add_filter('manage_edit-' . SFSLENGPUI_GALLERY_ALBUM_TAXONOMY . '_columns', function ($columns) {
     $columns['sfs_images'] = 'Manage Images';
     $columns['sfs_order'] = 'Order';
@@ -103,16 +92,10 @@ add_filter('manage_' . SFSLENGPUI_GALLERY_ALBUM_TAXONOMY . '_custom_column', fun
     return $content;
 }, 10, 3);
 
-/**
- * Help Screen & Reorder Page Registration
- */
 add_action('admin_menu', function () {
     add_media_page('Reorder Albums', 'Reorder Albums', 'upload_files', 'sfs-reorder', 'sfslengpui_render_reorder_screen');
 });
 
-/**
- * Robust logic to fetch ALL folders and sort them by meta order
- */
 function sfslengpui_get_albums_sorted()
 {
     $terms = get_terms(array('taxonomy' => SFSLENGPUI_GALLERY_ALBUM_TAXONOMY, 'hide_empty' => false));
@@ -166,9 +149,6 @@ function sfslengpui_render_reorder_screen()
 }
 
 
-/**
- * Admin: Shared Scripts & AJAX handlers
- */
 add_action('admin_enqueue_scripts', function ($hook) {
     wp_enqueue_media();
     wp_enqueue_script('jquery-ui-sortable');
@@ -215,9 +195,6 @@ add_action('wp_ajax_sfs_add_images', function () {
     wp_send_json_success();
 });
 
-/**
- * Frontend: Gallery Shortcode
- */
 add_shortcode('sfslengpui_gallery', function ($atts) {
     $atts = shortcode_atts(array('size' => 'full'), $atts);
     $albums = sfslengpui_get_albums_sorted();
@@ -231,13 +208,11 @@ add_shortcode('sfslengpui_gallery', function ($atts) {
     $html = '<section class="sfs-gallery-section">';
     $html .= '<div class="sfs-gallery-container">';
 
-    // Tab Navigation
     $html .= '<div class="sfs-gallery-tabs">';
     $html .= '<button type="button" class="sfs-tab-btn active" onclick="sfsShowTab(\'photos\', this)">Photo Gallery</button>';
     $html .= '<button type="button" class="sfs-tab-btn" onclick="sfsShowTab(\'videos\', this)">Video Gallery</button>';
     $html .= '</div>';
 
-    // Photos Tab
     $html .= '<div id="sfs-tab-photos" class="sfs-tab-content active">';
     if (empty($albums)) {
         $html .= "<p style='text-align:center;'>No photo albums found.</p>";
@@ -271,9 +246,8 @@ add_shortcode('sfslengpui_gallery', function ($atts) {
         }
         $html .= '</div>';
     }
-    $html .= '</div>'; // End Photos Tab
+    $html .= '</div>'; 
 
-    // Videos Tab
     $html .= '<div id="sfs-tab-videos" class="sfs-tab-content">';
     if (empty($videos)) {
         $html .= "<p style='text-align:center;'>No videos found.</p>";
@@ -294,15 +268,12 @@ add_shortcode('sfslengpui_gallery', function ($atts) {
         }
         $html .= '</div>';
     }
-    $html .= '</div>'; // End Videos Tab
+    $html .= '</div>'; 
 
     $html .= '</div></section>';
     return $html;
 });
 
-/**
- * Footer: Modal & Global JavaScript Interaction
- */
 add_action('wp_footer', function () {
     ?>
     <div class="sfs-modal" id="sfsFolderModal" style="display:none !important; z-index:99999999 !important;">
@@ -370,7 +341,7 @@ add_action('wp_footer', function () {
                 var m = document.getElementById('sfsFolderModal'), c = document.getElementById('sfsModalImages');
                 document.body.classList.remove('sfs-modal-open');
                 if (m) { m.classList.remove('sfs-active'); m.style.setProperty('display', 'none', 'important'); }
-                if (c) { c.innerHTML = ''; } // Clear media on close
+                if (c) { c.innerHTML = ''; } 
             };
 
             function sfsOpenFS(src, imgs, idx) {
