@@ -2,7 +2,7 @@
 /*
 Plugin Name: SFS Lengpui Gallery
 Description: Custom album-style photo gallery plugin for SFS Lengpui website
-Version: 1.1
+Version: 2.3
 Author: rex
 */
 
@@ -10,582 +10,390 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-define('SFSLENGPUI_GALLERY_VERSION', '1.1');
+define('SFSLENGPUI_GALLERY_VERSION', '2.3');
 define('SFSLENGPUI_GALLERY_ALBUM_TAXONOMY', 'sfs_gallery_album');
 
-// Enqueue styles
-function sfslengpui_gallery_styles()
-{
-    wp_enqueue_style(
-        'sfslengpui-gallery-style',
-        plugin_dir_url(__FILE__) . 'gallery.css',
-        array(),
-        SFSLENGPUI_GALLERY_VERSION
-    );
-}
-add_action('wp_enqueue_scripts', 'sfslengpui_gallery_styles');
+// Enqueue frontend styles
+add_action('wp_enqueue_scripts', function () {
+    wp_enqueue_style('sfslengpui-gallery-style', plugin_dir_url(__FILE__) . 'gallery.css', array(), SFSLENGPUI_GALLERY_VERSION);
+});
 
 /**
- * Register "Albums" taxonomy for Media Library items (attachments).
+ * Register Taxonomy
  */
-function sfslengpui_register_gallery_album_taxonomy()
-{
-    $labels = array(
-        'name' => __('Albums', 'sfslengpui-gallery'),
-        'singular_name' => __('Album', 'sfslengpui-gallery'),
-        'search_items' => __('Search Albums', 'sfslengpui-gallery'),
-        'all_items' => __('All Albums', 'sfslengpui-gallery'),
-        'parent_item' => __('Parent Album', 'sfslengpui-gallery'),
-        'parent_item_colon' => __('Parent Album:', 'sfslengpui-gallery'),
-        'edit_item' => __('Edit Album', 'sfslengpui-gallery'),
-        'update_item' => __('Update Album', 'sfslengpui-gallery'),
-        'add_new_item' => __('Add New Album', 'sfslengpui-gallery'),
-        'new_item_name' => __('New Album Name', 'sfslengpui-gallery'),
-        'menu_name' => __('Albums', 'sfslengpui-gallery'),
-    );
-
-    register_taxonomy(
-        SFSLENGPUI_GALLERY_ALBUM_TAXONOMY,
-        'attachment',
-        array(
-            'labels' => $labels,
-            'hierarchical' => true,
-            'show_ui' => true,
-            'show_admin_column' => true,
-            'show_in_rest' => true,
-            'public' => false,
-            'update_count_callback' => '_update_generic_term_count',
-            'query_var' => false,
-            'rewrite' => false,
-        )
-    );
-}
-add_action('init', 'sfslengpui_register_gallery_album_taxonomy');
-
-/**
- * Add a quick help page under Media.
- */
-function sfslengpui_gallery_register_help_page()
-{
-    add_media_page(
-        __('SFS Gallery', 'sfslengpui-gallery'),
-        __('SFS Gallery', 'sfslengpui-gallery'),
-        'upload_files',
-        'sfslengpui-gallery-help',
-        'sfslengpui_gallery_render_help_page'
-    );
-}
-add_action('admin_menu', 'sfslengpui_gallery_register_help_page');
-
-function sfslengpui_gallery_render_help_page()
-{
-    if (!current_user_can('upload_files')) {
-        wp_die(esc_html__('You do not have permission to access this page.', 'sfslengpui-gallery'));
-    }
-
-    $albums_url = admin_url('edit-tags.php?taxonomy=' . SFSLENGPUI_GALLERY_ALBUM_TAXONOMY . '&post_type=attachment');
-    $media_url = admin_url('upload.php');
-
-    echo '<div class="wrap">';
-    echo '<h1>' . esc_html__('SFS Gallery Setup', 'sfslengpui-gallery') . '</h1>';
-    echo '<p>' . esc_html__('This gallery now reads images from the WordPress Media Library.', 'sfslengpui-gallery') . '</p>';
-    echo '<ol>';
-    echo '<li>' . sprintf(
-        wp_kses_post(__('Create album categories in <a href="%s">Media > Albums</a>.', 'sfslengpui-gallery')),
-        esc_url($albums_url)
-    ) . '</li>';
-    echo '<li>' . sprintf(
-        wp_kses_post(__('Upload images in <a href="%s">Media > Library</a>.', 'sfslengpui-gallery')),
-        esc_url($media_url)
-    ) . '</li>';
-    echo '<li>' . esc_html__('Edit each image and assign it to one or more Albums.', 'sfslengpui-gallery') . '</li>';
-    echo '<li>' . esc_html__('Use shortcode: [sfslengpui_gallery]', 'sfslengpui-gallery') . '</li>';
-    echo '</ol>';
-    echo '<p><strong>' . esc_html__('Legacy mode:', 'sfslengpui-gallery') . '</strong> ' . esc_html__('[sfslengpui_gallery source="folders" folder="gallery"]', 'sfslengpui-gallery') . '</p>';
-    echo '</div>';
-}
-
-/**
- * Album Gallery Shortcode
- *
- * Default (WordPress way):
- *   [sfslengpui_gallery]
- *
- * Optional flat media mode:
- *   [sfslengpui_gallery mode="flat"]
- *
- * Legacy folder mode (backward compatible):
- *   [sfslengpui_gallery source="folders" folder="gallery"]
- *   [sfslengpui_gallery source="folders" folder="gallery" mode="flat"]
- */
-function sfslengpui_gallery_shortcode($atts)
-{
-    $atts = shortcode_atts(
-        array(
-            'source' => 'media',       // 'media' (default) or 'folders'
-            'folder' => 'gallery',
-            'mode' => 'albums',        // 'albums' or 'flat'
-            'title' => 'Photo Gallery',
-            'taxonomy' => SFSLENGPUI_GALLERY_ALBUM_TAXONOMY,
-            'size' => 'full',
+add_action('init', function () {
+    register_taxonomy(SFSLENGPUI_GALLERY_ALBUM_TAXONOMY, 'attachment', array(
+        'labels' => array(
+            'name' => 'Albums',
+            'singular_name' => 'Album',
+            'menu_name' => 'Albums',
+            'all_items' => 'All Albums',
+            'edit_item' => 'Edit Album',
+            'view_item' => 'View Album',
+            'update_item' => 'Update Album',
+            'add_new_item' => 'Add New Album',
+            'new_item_name' => 'New Album Name',
+            'search_items' => 'Search Albums'
         ),
-        $atts,
-        'sfslengpui_gallery'
-    );
+        'hierarchical' => true,
+        'show_ui' => true,
+        'show_admin_column' => true,
+        'show_in_rest' => true,
+        'public' => false,
+        'rewrite' => false,
+    ));
 
-    $source = strtolower(trim($atts['source']));
-    $mode = strtolower(trim($atts['mode']));
-    $taxonomy = sanitize_key($atts['taxonomy']);
-    $image_size = sanitize_key($atts['size']);
-
-    if ($mode !== 'flat') {
-        $mode = 'albums';
-    }
-
-    if ($source !== 'folders') {
-        $source = 'media';
-    }
-
-    // ===== LEGACY FOLDER SOURCE =====
-    if ($source === 'folders') {
-        $folder = trim($atts['folder'], '/\\');
-        $base_dir = plugin_dir_path(__FILE__) . $folder;
-        $base_url = plugin_dir_url(__FILE__) . $folder;
-
-        if (!is_dir($base_dir)) {
-            return '<p>Gallery folder not found.</p>';
-        }
-
-        if ($mode === 'flat') {
-            return sfslengpui_flat_gallery_from_folder($base_dir, $base_url);
-        }
-
-        $albums = sfslengpui_get_folder_albums($base_dir, $base_url);
-        if (empty($albums)) {
-            return '<p>No albums found. Create subfolders with images inside the gallery folder.</p>';
-        }
-
-        return sfslengpui_render_album_gallery($albums);
-    }
-
-    // ===== MEDIA LIBRARY SOURCE (default) =====
-    if ($mode === 'flat') {
-        return sfslengpui_flat_gallery_from_media($image_size);
-    }
-
-    if (!taxonomy_exists($taxonomy)) {
-        return '<p>Gallery album taxonomy is not registered.</p>';
-    }
-
-    $albums = sfslengpui_get_media_albums($taxonomy, $image_size);
-    if (empty($albums)) {
-        return '<p>No albums found in Media Library. Create albums in Media > Albums and assign images to them.</p>';
-    }
-
-    return sfslengpui_render_album_gallery($albums);
-}
-add_shortcode('sfslengpui_gallery', 'sfslengpui_gallery_shortcode');
+    // Register Video Post Type
+    register_post_type('sfs_video', array(
+        'labels' => array(
+            'name' => 'Videos',
+            'singular_name' => 'Video',
+            'add_new' => 'Add New Video',
+            'add_new_item' => 'Add New Video',
+            'edit_item' => 'Edit Video',
+            'new_item' => 'New Video',
+            'view_item' => 'View Video',
+            'search_items' => 'Search Videos',
+            'not_found' => 'No videos found',
+            'menu_name' => 'SFS Videos',
+        ),
+        'public' => true,
+        'has_archive' => false,
+        'menu_icon' => 'dashicons-video-alt3',
+        'supports' => array('title', 'thumbnail'),
+        'show_in_menu' => 'upload.php',
+    ));
+});
 
 /**
- * Build album data from Media Library taxonomy terms.
+ * Video URL Meta Box
  */
-function sfslengpui_get_media_albums($taxonomy, $image_size)
-{
-    $albums = array();
+add_action('add_meta_boxes_sfs_video', function () {
+    add_meta_box('sfs_video_url_box', 'Video Details', function ($post) {
+        $url = get_post_meta($post->ID, '_sfs_video_url', true);
+        echo '<p><label><strong>Video Link (YouTube, Vimeo, or MP4):</strong></label><br>';
+        echo '<input type="url" id="sfs_video_url" name="sfs_video_url" value="' . esc_attr($url) . '" class="widefat" placeholder="https://www.youtube.com/watch?v=..." /><br>';
+        echo '<button type="button" id="sfs_upload_video_btn" class="button" style="margin-top:10px;">Upload/Select Video</button><br>';
+        echo '<small>Paste the full URL or click the button to upload a local video.</small></p>';
+    }, 'sfs_video', 'normal', 'high');
+});
 
-    $terms = get_terms(
-        array(
-            'taxonomy' => $taxonomy,
-            'hide_empty' => false,
-            'orderby' => 'name',
-            'order' => 'ASC',
-        )
-    );
-
-    if (is_wp_error($terms) || empty($terms)) {
-        return $albums;
+add_action('save_post_sfs_video', function ($post_id) {
+    if (array_key_exists('sfs_video_url', $_POST)) {
+        update_post_meta($post_id, '_sfs_video_url', esc_url_raw($_POST['sfs_video_url']));
     }
+});
 
-    foreach ($terms as $term) {
-        $attachment_ids = get_posts(
-            array(
+/**
+ * Admin UI: Add Columns & Buttons to Taxonomy List
+ */
+add_filter('manage_edit-' . SFSLENGPUI_GALLERY_ALBUM_TAXONOMY . '_columns', function ($columns) {
+    $columns['sfs_images'] = 'Manage Images';
+    $columns['sfs_order'] = 'Order';
+    return $columns;
+});
+
+add_filter('manage_' . SFSLENGPUI_GALLERY_ALBUM_TAXONOMY . '_custom_column', function ($content, $column_name, $term_id) {
+    if ($column_name === 'sfs_images') {
+        return sprintf('<button type="button" class="button button-primary sfslengpui-add-images" data-term-id="%d">Add Images</button>', $term_id);
+    }
+    if ($column_name === 'sfs_order') {
+        return get_term_meta($term_id, 'sfslengpui_album_order', true) ?: '0';
+    }
+    return $content;
+}, 10, 3);
+
+/**
+ * Help Screen & Reorder Page Registration
+ */
+add_action('admin_menu', function () {
+    add_media_page('Reorder Albums', 'Reorder Albums', 'upload_files', 'sfs-reorder', 'sfslengpui_render_reorder_screen');
+});
+
+/**
+ * Robust logic to fetch ALL folders and sort them by meta order
+ */
+function sfslengpui_get_albums_sorted()
+{
+    $terms = get_terms(array('taxonomy' => SFSLENGPUI_GALLERY_ALBUM_TAXONOMY, 'hide_empty' => false));
+    if (is_wp_error($terms) || empty($terms))
+        return array();
+
+    usort($terms, function ($a, $b) {
+        $oa = (int) get_term_meta($a->term_id, 'sfslengpui_album_order', true);
+        $ob = (int) get_term_meta($b->term_id, 'sfslengpui_album_order', true);
+        return ($oa == $ob) ? strnatcasecmp($a->name, $b->name) : ($oa - $ob);
+    });
+    return $terms;
+}
+
+function sfslengpui_render_reorder_screen()
+{
+    $terms = sfslengpui_get_albums_sorted();
+    ?>
+    <div class="wrap">
+        <h1>Reorder Gallery Albums</h1>
+        <p>Drag and drop the albums below to change their display order on the website.</p>
+        <ul id="sfs-sortable"
+            style="background:#fff; border:1px solid #ccd0d4; max-width:600px; padding:0; list-style:none; border-radius:4px;">
+            <?php foreach ($terms as $term): ?>
+                <li data-id="<?php echo $term->term_id; ?>"
+                    style="padding:15px; border-bottom:1px solid #eee; cursor:move; background:#fff; display:flex; align-items:center;">
+                    <span class="dashicons dashicons-move" style="margin-right:15px; color:#999;"></span>
+                    <strong><?php echo esc_html($term->name); ?></strong>
+                </li>
+            <?php endforeach; ?>
+        </ul>
+        <div style="margin-top:20px;">
+            <button id="sfs-save-order" class="button button-primary button-large">Save New Order</button>
+            <span id="sfs-status" style="margin-left:15px; font-weight:bold; color:#46b450;"></span>
+        </div>
+    </div>
+    <script>
+        jQuery(document).ready(function ($) {
+            $("#sfs-sortable").sortable();
+            $("#sfs-save-order").click(function () {
+                var order = [];
+                $("#sfs-sortable li").each(function () { order.push($(this).data("id")); });
+                $("#sfs-status").text("Saving...");
+                $.post(ajaxurl, { action: "sfs_save_bulk_order", order: order, nonce: "<?php echo wp_create_nonce('sfs-reorder'); ?>" }, function () {
+                    $("#sfs-status").text("Order Saved!").fadeOut(3000, function () { $(this).text("").show(); });
+                });
+            });
+        });
+    </script>
+    <?php
+}
+
+
+/**
+ * Admin: Shared Scripts & AJAX handlers
+ */
+add_action('admin_enqueue_scripts', function ($hook) {
+    wp_enqueue_media();
+    wp_enqueue_script('jquery-ui-sortable');
+    wp_add_inline_script('jquery', '
+        jQuery(document).ready(function($){
+            $(document).on("click", ".sfslengpui-add-images", function(e){
+                e.preventDefault();
+                var termId = $(this).data("term-id");
+                var frame = wp.media({ title: "Add Images to Album", button: { text: "Add to Album" }, multiple: true });
+                frame.on("select", function(){
+                    var ids = [];
+                    frame.state().get("selection").each(function(a){ ids.push(a.id); });
+                    $.post(ajaxurl, {action: "sfs_add_images", term_id: termId, ids: ids, nonce: "' . wp_create_nonce('sfs-add') . '"}, function(){
+                        alert("Images added successfully!");
+                    });
+                }).open();
+            });
+
+            // Local Video Uploader
+            $(document).on("click", "#sfs_upload_video_btn", function(e){
+                e.preventDefault();
+                var frame = wp.media({ title: "Select/Upload Video", button: { text: "Use this Video" }, multiple: false, library: { type: "video" } });
+                frame.on("select", function(){
+                    var attachment = frame.state().get("selection").first().toJSON();
+                    $("#sfs_video_url").val(attachment.url);
+                }).open();
+            });
+        });
+    ');
+});
+
+add_action('wp_ajax_sfs_save_bulk_order', function () {
+    check_ajax_referer('sfs-reorder', 'nonce');
+    foreach ((array) $_POST['order'] as $idx => $id)
+        update_term_meta(intval($id), 'sfslengpui_album_order', $idx);
+    wp_send_json_success();
+});
+
+add_action('wp_ajax_sfs_add_images', function () {
+    check_ajax_referer('sfs-add', 'nonce');
+    $tid = intval($_POST['term_id']);
+    foreach ((array) $_POST['ids'] as $id)
+        wp_set_object_terms(intval($id), $tid, SFSLENGPUI_GALLERY_ALBUM_TAXONOMY, true);
+    wp_send_json_success();
+});
+
+/**
+ * Frontend: Gallery Shortcode
+ */
+add_shortcode('sfslengpui_gallery', function ($atts) {
+    $atts = shortcode_atts(array('size' => 'full'), $atts);
+    $albums = sfslengpui_get_albums_sorted();
+    $videos = get_posts(array(
+        'post_type' => 'sfs_video',
+        'posts_per_page' => -1,
+        'orderby' => 'menu_order',
+        'order' => 'ASC'
+    ));
+
+    $html = '<section class="sfs-gallery-section">';
+    $html .= '<div class="sfs-gallery-container">';
+
+    // Tab Navigation
+    $html .= '<div class="sfs-gallery-tabs">';
+    $html .= '<button type="button" class="sfs-tab-btn active" onclick="sfsShowTab(\'photos\', this)">Photo Gallery</button>';
+    $html .= '<button type="button" class="sfs-tab-btn" onclick="sfsShowTab(\'videos\', this)">Video Gallery</button>';
+    $html .= '</div>';
+
+    // Photos Tab
+    $html .= '<div id="sfs-tab-photos" class="sfs-tab-content active">';
+    if (empty($albums)) {
+        $html .= "<p style='text-align:center;'>No photo albums found.</p>";
+    } else {
+        $html .= '<div class="sfs-folder-grid">';
+        foreach ($albums as $album) {
+            $images = get_posts(array(
                 'post_type' => 'attachment',
                 'post_status' => 'inherit',
-                'post_mime_type' => 'image',
                 'posts_per_page' => -1,
-                'orderby' => 'menu_order ID',
-                'order' => 'ASC',
                 'fields' => 'ids',
-                'tax_query' => array(
-                    array(
-                        'taxonomy' => $taxonomy,
-                        'field' => 'term_id',
-                        'terms' => $term->term_id,
-                    ),
-                ),
-            )
-        );
-
-        if (empty($attachment_ids)) {
-            continue;
-        }
-
-        $image_urls = array();
-        $cover_url = '';
-
-        foreach ($attachment_ids as $attachment_id) {
-            $image_url = wp_get_attachment_image_url($attachment_id, $image_size);
-            if (!$image_url) {
-                $image_url = wp_get_attachment_url($attachment_id);
-            }
-            if (!$image_url) {
+                'tax_query' => array(array('taxonomy' => SFSLENGPUI_GALLERY_ALBUM_TAXONOMY, 'field' => 'term_id', 'terms' => $album->term_id))
+            ));
+            if (empty($images))
                 continue;
-            }
 
-            if ($cover_url === '') {
-                $cover_url = wp_get_attachment_image_url($attachment_id, 'medium_large');
-                if (!$cover_url) {
-                    $cover_url = $image_url;
-                }
-            }
+            $urls = array();
+            foreach ($images as $id)
+                $urls[] = wp_get_attachment_image_url($id, $atts['size']) ?: wp_get_attachment_url($id);
+            $cover = wp_get_attachment_image_url($images[0], 'medium_large') ?: $urls[0];
+            $json = esc_attr(wp_json_encode($urls));
 
-            $image_urls[] = $image_url;
+            $html .= sprintf(
+                '<div class="sfs-folder-item" onclick="if(window.sfsOpenFolder){ sfsOpenFolder(\'%s\', %s); }"><img src="%s" alt="%s" style="pointer-events:none;"><div class="sfs-event-name" style="pointer-events:none;">%s</div></div>',
+                esc_js($album->name),
+                $json,
+                esc_url($cover),
+                esc_attr($album->name),
+                esc_html($album->name)
+            );
         }
-
-        if (empty($image_urls)) {
-            continue;
-        }
-
-        $albums[] = array(
-            'name' => $term->name,
-            'cover' => $cover_url,
-            'images' => $image_urls,
-        );
+        $html .= '</div>';
     }
+    $html .= '</div>'; // End Photos Tab
 
-    return $albums;
-}
+    // Videos Tab
+    $html .= '<div id="sfs-tab-videos" class="sfs-tab-content">';
+    if (empty($videos)) {
+        $html .= "<p style='text-align:center;'>No videos found.</p>";
+    } else {
+        $html .= '<div class="sfs-folder-grid">';
+        foreach ($videos as $video) {
+            $url = get_post_meta($video->ID, '_sfs_video_url', true);
+            $thumb = get_the_post_thumbnail_url($video->ID, 'medium_large') ?: plugin_dir_url(__FILE__) . 'video-placeholder.png';
+
+            $html .= sprintf(
+                '<div class="sfs-folder-item" onclick="if(window.sfsOpenVideo){ sfsOpenVideo(\'%s\', \'%s\'); }"><img src="%s" alt="%s" style="pointer-events:none;"><div class="sfs-event-name" style="pointer-events:none;">%s</div></div>',
+                esc_js($video->post_title),
+                esc_url($url),
+                esc_url($thumb),
+                esc_attr($video->post_title),
+                esc_html($video->post_title)
+            );
+        }
+        $html .= '</div>';
+    }
+    $html .= '</div>'; // End Videos Tab
+
+    $html .= '</div></section>';
+    return $html;
+});
 
 /**
- * Build album data from plugin folders (legacy mode).
+ * Footer: Modal & Global JavaScript Interaction
  */
-function sfslengpui_get_folder_albums($base_dir, $base_url)
-{
-    $albums = array();
-    $items = scandir($base_dir);
-
-    foreach ($items as $item) {
-        if ($item === '.' || $item === '..') {
-            continue;
-        }
-
-        $item_path = $base_dir . '/' . $item;
-        if (!is_dir($item_path)) {
-            continue;
-        }
-
-        $images = glob($item_path . '/*.{jpg,jpeg,png,gif,webp,JPG,JPEG,PNG,GIF,WEBP}', GLOB_BRACE);
-        if (empty($images)) {
-            continue;
-        }
-
-        usort(
-            $images,
-            function ($a, $b) {
-                return strnatcasecmp(basename($a), basename($b));
-            }
-        );
-
-        $image_urls = array();
-        foreach ($images as $img) {
-            $image_urls[] = $base_url . '/' . $item . '/' . rawurlencode(basename($img));
-        }
-
-        if (empty($image_urls)) {
-            continue;
-        }
-
-        $album_name = str_replace(array('-', '_'), ' ', $item);
-        $album_name = ucwords($album_name);
-
-        $albums[] = array(
-            'name' => $album_name,
-            'cover' => $image_urls[0],
-            'images' => $image_urls,
-        );
-    }
-
-    return $albums;
-}
-
-/**
- * Render album view (same frontend UI for both data sources).
- */
-function sfslengpui_render_album_gallery($albums)
-{
-    $output = '';
-
-    $output .= '<section class="sfs-gallery-section">';
-    $output .= '<div class="sfs-gallery-container">';
-    $output .= '<div class="sfs-folder-grid">';
-
-    foreach ($albums as $album) {
-        $json_images = esc_attr(wp_json_encode($album['images']));
-        $output .= '<div class="sfs-folder-item" data-album-name="' . esc_attr($album['name']) . '" data-album-images="' . $json_images . '">';
-        $output .= '<img src="' . esc_url($album['cover']) . '" alt="' . esc_attr($album['name']) . '" loading="lazy">';
-        $output .= '<div class="sfs-event-name">' . esc_html($album['name']) . '</div>';
-        $output .= '</div>';
-    }
-
-    $output .= '</div>'; // .sfs-folder-grid
-    $output .= '</div>'; // .sfs-gallery-container
-
-    // Album Modal
-    $output .= '<div class="sfs-modal" id="sfsFolderModal">';
-    $output .= '<div class="sfs-modal-content">';
-    $output .= '<div class="sfs-modal-header">';
-    $output .= '<h2 id="sfsEventTitle"></h2>';
-    $output .= '<button class="sfs-close" onclick="sfsCloseFolder()">&times;</button>';
-    $output .= '</div>';
-    $output .= '<div class="sfs-modal-images" id="sfsModalImages"></div>';
-    $output .= '</div>';
-    $output .= '</div>';
-
-    // Fullscreen Image Modal
-    $output .= '<div class="sfs-fullscreen-modal" id="sfsFullscreenModal">';
-    $output .= '<button class="sfs-fullscreen-close" onclick="sfsCloseFullscreen()">&times;</button>';
-    $output .= '<button class="sfs-nav-button sfs-nav-prev" onclick="sfsNavigateImage(-1)">&#10094;</button>';
-    $output .= '<div class="sfs-fullscreen-content">';
-    $output .= '<img id="sfsFullscreenImage" src="" alt="Fullscreen Image">';
-    $output .= '</div>';
-    $output .= '<button class="sfs-nav-button sfs-nav-next" onclick="sfsNavigateImage(1)">&#10095;</button>';
-    $output .= '</div>';
-
-    $output .= '</section>';
-
-    // Inline JS (only once)
-    $output .= sfslengpui_gallery_inline_js();
-
-    return $output;
-}
-
-/**
- * Flat gallery from Media Library.
- */
-function sfslengpui_flat_gallery_from_media($image_size)
-{
-    $attachment_ids = get_posts(
-        array(
-            'post_type' => 'attachment',
-            'post_status' => 'inherit',
-            'post_mime_type' => 'image',
-            'posts_per_page' => -1,
-            'orderby' => 'date',
-            'order' => 'DESC',
-            'fields' => 'ids',
-        )
-    );
-
-    if (empty($attachment_ids)) {
-        return '<p>No images found in Media Library.</p>';
-    }
-
-    $output = '<div class="sfslengpui-gallery">';
-    $has_images = false;
-
-    foreach ($attachment_ids as $attachment_id) {
-        $url = wp_get_attachment_image_url($attachment_id, $image_size);
-        if (!$url) {
-            $url = wp_get_attachment_url($attachment_id);
-        }
-        if (!$url) {
-            continue;
-        }
-
-        $has_images = true;
-        $output .= '<div class="sfslengpui-gallery-item">';
-        $output .= '<img src="' . esc_url($url) . '" alt="" loading="lazy">';
-        $output .= '</div>';
-    }
-
-    $output .= '</div>';
-
-    if (!$has_images) {
-        return '<p>No images found in Media Library.</p>';
-    }
-
-    return $output;
-}
-
-/**
- * Flat gallery from plugin folder (legacy mode).
- */
-function sfslengpui_flat_gallery_from_folder($dir, $base_url)
-{
-    $images = glob($dir . '/*.{jpg,jpeg,png,gif,webp,JPG,JPEG,PNG,GIF,WEBP}', GLOB_BRACE);
-
-    if (empty($images)) {
-        return '<p>No images found.</p>';
-    }
-
-    $output = '<div class="sfslengpui-gallery">';
-
-    foreach ($images as $image) {
-        $url = $base_url . '/' . rawurlencode(basename($image));
-        $output .= '<div class="sfslengpui-gallery-item">';
-        $output .= '<img src="' . esc_url($url) . '" alt="" loading="lazy">';
-        $output .= '</div>';
-    }
-
-    $output .= '</div>';
-    return $output;
-}
-
-/**
- * Backward-compatible function name.
- */
-function sfslengpui_flat_gallery($dir, $base_url)
-{
-    return sfslengpui_flat_gallery_from_folder($dir, $base_url);
-}
-
-/**
- * Inline JavaScript for the album gallery.
- */
-function sfslengpui_gallery_inline_js()
-{
-    static $js_outputted = false;
-    if ($js_outputted) {
-        return '';
-    }
-    $js_outputted = true;
-
-    ob_start();
+add_action('wp_footer', function () {
     ?>
+    <div class="sfs-modal" id="sfsFolderModal" style="display:none !important; z-index:99999999 !important;">
+        <div class="sfs-modal-content">
+            <div class="sfs-modal-header">
+                <h2 id="sfsEventTitle"></h2>
+                <button type="button" class="sfs-close" onclick="sfsCloseFolder()">&times;</button>
+            </div>
+            <div id="sfsModalImages" class="sfs-modal-images"></div>
+        </div>
+    </div>
+    <div class="sfs-fullscreen-modal" id="sfsFullscreenModal" style="display:none; z-index:999999999 !important;">
+        <button type="button" class="sfs-fullscreen-close" onclick="sfsCloseFullscreen()">&times;</button>
+        <button type="button" class="sfs-nav-button sfs-nav-prev" onclick="sfsNavigateImage(-1)">&#10094;</button>
+        <div class="sfs-fullscreen-content"><img id="sfsFullscreenImage" src=""></div>
+        <button type="button" class="sfs-nav-button sfs-nav-next" onclick="sfsNavigateImage(1)">&#10095;</button>
+    </div>
     <script>
         (function () {
-            var sfsCurrentImages = [];
-            var sfsCurrentIndex = 0;
+            var sfsImgs = [], sfsIdx = 0;
 
-            window.sfsOpenFolder = function (eventName, images) {
-                var modal = document.getElementById('sfsFolderModal');
-                var eventTitle = document.getElementById('sfsEventTitle');
-                var modalImages = document.getElementById('sfsModalImages');
+            window.sfsShowTab = function (tabId, btn) {
+                document.querySelectorAll('.sfs-tab-content').forEach(function (el) { el.classList.remove('active'); });
+                document.querySelectorAll('.sfs-tab-btn').forEach(function (el) { el.classList.remove('active'); });
+                document.getElementById('sfs-tab-' + tabId).classList.add('active');
+                btn.classList.add('active');
+            };
 
-                eventTitle.textContent = eventName;
-                modalImages.innerHTML = '';
-
-                images.forEach(function (src, index) {
-                    var img = document.createElement('img');
-                    img.src = src;
-                    img.alt = eventName + ' Image ' + (index + 1);
-                    img.loading = 'lazy';
-                    img.onclick = function () { sfsOpenFullscreen(src, images, index); };
-                    modalImages.appendChild(img);
-                });
-
+            window.sfsOpenVideo = function (name, url) {
+                var m = document.getElementById('sfsFolderModal'), t = document.getElementById('sfsEventTitle'), c = document.getElementById('sfsModalImages');
+                if (!m) return;
+                t.textContent = name;
+                c.innerHTML = '';
+                var frame;
+                if (url.includes('youtube.com') || url.includes('youtu.be')) {
+                    var vidId = url.split('v=')[1] || url.split('/').pop().split('?')[0];
+                    if (vidId && vidId.includes('&')) vidId = vidId.split('&')[0];
+                    frame = '<iframe width="100%" height="500" src="https://www.youtube.com/embed/' + vidId + '?autoplay=1" frameborder="0" allow="autoplay; fullscreen" allowfullscreen></iframe>';
+                } else if (url.includes('vimeo.com')) {
+                    var vidId = url.split('/').pop();
+                    frame = '<iframe src="https://player.vimeo.com/video/' + vidId + '?autoplay=1" width="100%" height="500" frameborder="0" allow="autoplay; fullscreen" allowfullscreen></iframe>';
+                } else {
+                    frame = '<video controls autoplay style="width:100%; max-height:500px;"><source src="' + url + '" type="video/mp4"></video>';
+                }
+                c.innerHTML = '<div class="sfs-video-wrapper" style="padding:20px;">' + frame + '</div>';
                 document.body.classList.add('sfs-modal-open');
-                modal.classList.add('sfs-active');
-                modal.style.display = 'block';
-                document.addEventListener('keydown', sfsHandleKeys);
+                m.classList.add('sfs-active'); m.style.setProperty('display', 'block', 'important');
+            };
+
+            window.sfsOpenFolder = function (name, imgs) {
+                var m = document.getElementById('sfsFolderModal'), t = document.getElementById('sfsEventTitle'), c = document.getElementById('sfsModalImages');
+                if (!m) return;
+                t.textContent = name; c.innerHTML = '';
+                sfsImgs = imgs;
+                imgs.forEach(function (src, i) {
+                    var img = document.createElement('img'); img.src = src;
+                    img.onclick = function () { sfsOpenFS(src, imgs, i); };
+                    c.appendChild(img);
+                });
+                document.body.classList.add('sfs-modal-open');
+                m.classList.add('sfs-active'); m.style.setProperty('display', 'block', 'important');
             };
 
             window.sfsCloseFolder = function () {
-                var modal = document.getElementById('sfsFolderModal');
+                var m = document.getElementById('sfsFolderModal'), c = document.getElementById('sfsModalImages');
                 document.body.classList.remove('sfs-modal-open');
-                modal.classList.remove('sfs-active');
-                modal.style.display = 'none';
-                document.removeEventListener('keydown', sfsHandleKeys);
+                if (m) { m.classList.remove('sfs-active'); m.style.setProperty('display', 'none', 'important'); }
+                if (c) { c.innerHTML = ''; } // Clear media on close
             };
 
-            function sfsOpenFullscreen(src, images, index) {
-                var modal = document.getElementById('sfsFullscreenModal');
-                var img = document.getElementById('sfsFullscreenImage');
-
-                img.src = src;
-                sfsCurrentImages = images;
-                sfsCurrentIndex = index;
-
-                modal.style.display = 'flex';
+            function sfsOpenFS(src, imgs, idx) {
+                var m = document.getElementById('sfsFullscreenModal'), i = document.getElementById('sfsFullscreenImage');
+                i.src = src; sfsImgs = imgs; sfsIdx = idx;
+                m.style.display = 'flex'; m.classList.add('sfs-active');
                 document.body.classList.add('sfs-modal-open');
-                modal.classList.add('sfs-active');
             }
 
             window.sfsCloseFullscreen = function () {
-                var modal = document.getElementById('sfsFullscreenModal');
-                document.body.classList.remove('sfs-modal-open');
-                modal.classList.remove('sfs-active');
-                modal.style.display = 'none';
-                sfsCurrentImages = [];
-                sfsCurrentIndex = 0;
+                var m = document.getElementById('sfsFullscreenModal');
+                if (m) { m.style.display = 'none'; m.classList.remove('sfs-active'); }
+                if (!document.getElementById('sfsFolderModal').classList.contains('sfs-active')) document.body.classList.remove('sfs-modal-open');
             };
 
-            window.sfsNavigateImage = function (direction) {
-                if (!sfsCurrentImages.length) {
-                    return;
-                }
-                sfsCurrentIndex = (sfsCurrentIndex + direction + sfsCurrentImages.length) % sfsCurrentImages.length;
-                document.getElementById('sfsFullscreenImage').src = sfsCurrentImages[sfsCurrentIndex];
+            window.sfsNavigateImage = function (d) {
+                if (!sfsImgs.length) return;
+                sfsIdx = (sfsIdx + d + sfsImgs.length) % sfsImgs.length;
+                document.getElementById('sfsFullscreenImage').src = sfsImgs[sfsIdx];
             };
 
-            function sfsHandleKeys(e) {
-                var fsModal = document.getElementById('sfsFullscreenModal');
-                var isFullscreenOpen = fsModal && fsModal.style.display === 'flex';
-
-                if (e.key === 'Escape') {
-                    if (isFullscreenOpen) {
-                        sfsCloseFullscreen();
-                    } else {
-                        sfsCloseFolder();
-                    }
-                }
-
-                if (!isFullscreenOpen) {
-                    return;
-                }
-
-                if (e.key === 'ArrowLeft') {
-                    sfsNavigateImage(-1);
-                }
-
-                if (e.key === 'ArrowRight') {
-                    sfsNavigateImage(1);
-                }
-            }
-
-            // Close when clicking outside modal content
-            window.addEventListener('click', function (e) {
-                var folderModal = document.getElementById('sfsFolderModal');
-                var fsModal = document.getElementById('sfsFullscreenModal');
-                if (e.target === folderModal) {
-                    sfsCloseFolder();
-                }
-                if (e.target === fsModal) {
-                    sfsCloseFullscreen();
-                }
-            });
-
-            // Click handler for folder items via data attributes
-            document.addEventListener('click', function (e) {
-                var folderItem = e.target.closest('.sfs-folder-item');
-                if (!folderItem) {
-                    return;
-                }
-
-                var albumName = folderItem.getAttribute('data-album-name');
-                var albumImages = folderItem.getAttribute('data-album-images');
-
-                if (albumName && albumImages) {
-                    try {
-                        var images = JSON.parse(albumImages);
-                        sfsOpenFolder(albumName, images);
-                    } catch (err) {
-                        console.error('SFS Gallery: Could not parse album images', err);
-                    }
-                }
-            });
+            document.addEventListener('keydown', function (e) { if (e.key === 'Escape') { sfsCloseFullscreen(); sfsCloseFolder(); } });
         })();
     </script>
     <?php
-    return ob_get_clean();
-}
+});

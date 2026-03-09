@@ -51,11 +51,74 @@
   font-weight: bold;
 }
 
+/* ---------- Tabs Navigation ---------- */
+.sfs-gallery-tabs {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  margin-bottom: 40px;
+}
+
+.sfs-tab-btn {
+  background: #f8f9fa;
+  border: 1px solid #ddd;
+  padding: 0 30px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #555;
+  cursor: pointer;
+  border-radius: 50px;
+  transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
+  font-family: inherit;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+}
+
+.sfs-tab-btn:hover {
+  background: #fff;
+  color: #2a4880;
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.sfs-tab-btn.active {
+  background: #2a4880;
+  color: #fff;
+  border-color: #2a4880;
+  box-shadow: 0 8px 20px rgba(42, 72, 128, 0.3);
+}
+
+.sfs-tab-content {
+  display: none;
+}
+
+.sfs-tab-content.active {
+  display: block;
+  animation: sfsFadeIn 0.6s cubic-bezier(0.165, 0.84, 0.44, 1);
+}
+
+@keyframes sfsFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Video Wrapper */
+.sfs-video-wrapper iframe,
+.sfs-video-wrapper video {
+  border-radius: 12px;
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+}
+
 /* ---------- Album / Folder Grid ---------- */
 .sfs-folder-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 20px;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: 30px;
   padding: 10px;
 }
 
@@ -63,80 +126,63 @@
   position: relative;
   overflow: hidden;
   border-radius: 8px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   transition:
     transform 0.3s ease,
     box-shadow 0.3s ease;
   cursor: pointer;
   background: #fff;
+  border: 1px solid #eee;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 0 !important;
+  padding: 0 !important;
+  margin: 0 !important;
 }
 
 .sfs-folder-item:hover {
-  transform: scale(1.05);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.18);
-}
-
-/* Gradient overlay on hover */
-.sfs-folder-item::before {
-  content: "";
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(to top, rgba(0, 0, 0, 0.4), transparent);
-  opacity: 0;
-  transition: opacity 0.3s ease;
-  z-index: 1;
-}
-
-.sfs-folder-item:hover::before {
-  opacity: 1;
+  transform: translateY(-5px);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
 }
 
 .sfs-folder-item img {
-  width: 100%;
-  height: 276px !important;
-  object-fit: cover;
-  display: block;
+  width: 100% !important;
+  height: 320px !important;
+  object-fit: cover !important;
+  object-position: top !important;
+  display: block !important;
+  pointer-events: none;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: none !important;
 }
 
 .sfs-folder-item .sfs-event-name {
-  padding: 10px;
-  text-align: center;
+  padding: 12px 10px !important;
+  text-align: center !important;
   color: #333;
   font-weight: bold;
-  background: rgba(255, 255, 255, 0.9);
-  font-size: 1rem !important;
+  background: #fff;
+  font-size: 0.95rem !important;
+  line-height: 1.3 !important;
   position: relative;
   z-index: 2;
-  border-top: 1px solid #ddd;
-  font-family: "Georgia", serif;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
+  font-family: "Georgia", serif !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
   transition:
-    color 0.3s ease,
-    background 0.3s ease;
-}
-
-.sfs-folder-item .sfs-event-name i {
-  font-size: 1rem;
-  color: #111;
-  transition:
-    transform 0.3s ease,
+    background 0.3s ease,
     color 0.3s ease;
+  pointer-events: none;
+  margin-top: -22px !important;
+  border: none !important;
+  flex-grow: 1;
 }
 
 .sfs-folder-item:hover .sfs-event-name {
   color: #fff;
   background: #546381;
-}
-
-.sfs-folder-item:hover .sfs-event-name i {
-  transform: scale(1.2);
-  color: #fff;
 }
 
 /* ---------- Folder / Album Modal ---------- */
@@ -147,11 +193,15 @@
   left: 0;
   width: 100%;
   height: 100vh;
-  background: rgba(0, 0, 0, 0.95);
-  z-index: 99999;
+  background: rgba(0, 0, 0, 0.9);
+  z-index: 999999;
   overflow-y: auto;
   padding: 20px;
   backdrop-filter: blur(5px);
+}
+
+.sfs-modal.sfs-active {
+  display: block;
 }
 
 .sfs-modal-content {
@@ -313,8 +363,8 @@
   font-size: 40px;
   cursor: pointer;
   z-index: 100001;
-  width: 50px;
-  height: 50px;
+  width: 80px;
+  height: 80px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -360,7 +410,6 @@
 /* ---------- Body lock when modal open ---------- */
 body.sfs-modal-open {
   overflow: hidden;
-  pointer-events: none;
 }
 
 .sfs-modal.sfs-active {
@@ -374,12 +423,8 @@ body.sfs-modal-open {
 /* ---------- Responsive: XL screens ---------- */
 @media (min-width: 1200px) {
   .sfs-folder-grid {
-    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-    gap: 30px;
-  }
-
-  .sfs-folder-item img {
-    height: 220px !important;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 25px;
   }
 
   .sfs-folder-item .sfs-event-name {
