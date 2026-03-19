@@ -2,7 +2,7 @@
 /*
 Plugin Name: SFS Lengpui Gallery
 Description: Custom album-style photo gallery plugin for SFS Lengpui website
-Version: 2.3
+Version: 2.4
 Author: rex
 */
 
@@ -10,11 +10,24 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-define('SFSLENGPUI_GALLERY_VERSION', '2.3');
+define('SFSLENGPUI_GALLERY_VERSION', '2.4');
 define('SFSLENGPUI_GALLERY_ALBUM_TAXONOMY', 'sfs_gallery_album');
 
+// add_action('wp_enqueue_scripts', function () {
+//     wp_enqueue_style('sfslengpui-gallery-style', plugin_dir_url(__FILE__) . 'gallery.css', array(), SFSLENGPUI_GALLERY_VERSION);
+// });
+
 add_action('wp_enqueue_scripts', function () {
-    wp_enqueue_style('sfslengpui-gallery-style', plugin_dir_url(__FILE__) . 'gallery.css', array(), SFSLENGPUI_GALLERY_VERSION);
+    global $post;
+
+    if (is_a($post, 'WP_Post') && has_shortcode($post->post_content, 'sfslengpui_gallery')) {
+        wp_enqueue_style(
+            'sfslengpui-gallery-style',
+            plugin_dir_url(__FILE__) . 'gallery.css',
+            array(),
+            SFSLENGPUI_GALLERY_VERSION
+        );
+    }
 });
 
 add_action('init', function () {
